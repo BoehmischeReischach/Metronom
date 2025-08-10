@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reischinga Böhmische Metronom 🎶</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-light-bg: #f0f2f5;
+    --color-light-text: #333;
+    --color-light-accent: #0077cc;
+    --color-light-button-bg: #0077cc;
+    --color-light-button-hover: #005fa3;
+
+    --color-dark-bg: #121212;
+    --color-dark-text: #e0e0e0;
+    --color-dark-accent: #1db954;
+    --color-dark-button-bg: #1db954;
+    --color-dark-button-hover: #17a845;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--color-light-bg);
+    color: var(--color-light-text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    user-select: none;
+  }
+
+  body.dark {
+    background-color: var(--color-dark-bg);
+    color: var(--color-dark-text);
+  }
+
+  header {
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  header img {
+    max-width: 120px;
+    margin-bottom: 10px;
+  }
+
+  header h1 {
+    font-weight: 700;
+    font-size: 1.9rem;
+    color: var(--color-light-accent);
+    transition: color 0.3s ease;
+  }
+
+  body.dark header h1 {
+    color: var(--color-dark-accent);
+  }
+
+  select {
+    max-width: 480px;
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 14px 12px;
+    border-radius: 10px;
+    border: 2px solid var(--color-light-accent);
+    background: transparent;
+    color: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+  }
+
+  body.dark select {
+    border-color: var(--color-dark-accent);
+  }
+
+  select:hover, select:focus {
+    border-color: var(--color-light-button-hover);
+  }
+
+  body.dark select:hover, body.dark select:focus {
+    border-color: var(--color-dark-button-hover);
+  }
+
+  .buttons {
+    max-width: 480px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+  }
+
+  button {
+    flex: 1;
+    margin: 0 8px;
+    padding: 16px 0;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+
+  button.start {
+    background-color: var(--color-light-button-bg);
+  }
+  button.start:hover {
+    background-color: var(--color-light-button-hover);
+    box-shadow: 0 8px 16px rgba(0,119,204,0.6);
+  }
+  body.dark button.start {
+    background-color: var(--color-dark-button-bg);
+  }
+  body.dark button.start:hover {
+    background-color: var(--color-dark-button-hover);
+    box-shadow: 0 8px 16px rgba(29,185,84,0.6);
+  }
+
+  button.stop {
+    background-color: #e63946;
+  }
+  button.stop:hover {
+    background-color: #b42a37;
+    box-shadow: 0 8px 16px rgba(230,57,70,0.6);
+  }
+
+  .info {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .beat {
+    font-size: 6rem;
+    font-weight: 900;
+    margin-bottom: 40px;
+    color: var(--color-light-accent);
+    transition: color 0.3s ease;
+  }
+
+  body.dark .beat {
+    color: var(--color-dark-accent);
+  }
+
+  /* Pulsierender Effekt für Beat */
+  .beat.pulse {
+    animation: pulse 0.3s ease;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); text-shadow: 0 0 10px currentColor; }
+    50% { transform: scale(1.3); text-shadow: 0 0 25px currentColor; }
+    100% { transform: scale(1); text-shadow: 0 0 10px currentColor; }
+  }
+
+  /* Dark mode switch */
+  #modeSwitch {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: 2px solid currentColor;
+    border-radius: 30px;
+    width: 60px;
+    height: 30px;
+    cursor: pointer;
+    outline: none;
+  }
+  #modeSwitch:before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 22px;
+    height: 22px;
+    background: currentColor;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+  #modeSwitch.dark:before {
+    transform: translateX(30px);
+  }
+
+  /* Pendel Container */
+  .pendulum-container {
+    width: 150px;
+    height: 200px;
+    position: relative;
+    margin: 0 auto 40px;
+  }
+
+  /* Pendel Stab */
+  .pendulum-rod {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 4px;
+    height: 130px;
+    background: var(--color-light-accent);
+    transform-origin: top center;
+    transition: background-color 0.3s ease;
+  }
+
+  body.dark .pendulum-rod {
+    background: var(--color-dark-accent);
+  }
+
+  /* Pendel Gewicht */
+  .pendulum-bob {
+    position: absolute;
+    top: 130px;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    background: var(--color-light-button-bg);
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    transform: translateX(-50%);
+    transition: background-color 0.3s ease;
+  }
+  body.dark .pendulum-bob {
+    background: var(--color-dark-button-bg);
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWknUsxDiyy8Wzdzy6LvgxY1iHIMkwkGuNTg&s" />
+  <h1>Reischinga Böhmische Metronom 🎶</h1>
+</header>
+
+<select id="songSelect" aria-label="Lied auswählen">
+  <option value="">-- Lied auswählen --</option>
+</select>
+
+<div class="pendulum-container">
+  <div class="pendulum-rod" id="pendulumRod"></div>
+  <div class="pendulum-bob" id="pendulumBob"></div>
+</div>
+
+<div class="buttons">
+  <button class="start" id="startBtn">Start</button>
+  <button class="stop" id="stopBtn">Stop</button>
+</div>
+
+<div class="info" id="songInfo">BPM: - | Takt: -</div>
+<div class="beat" id="beatDisplay">-</div>
+
+<button id="modeSwitch" aria-label="Dark Mode Umschalten" title="Dark Mode Umschalten"></button>
+
+<script>
+const songs = [
+  { title: "Bürgerwehr-Marsch Peter Fihn 2a", bpm: 112, takt: "2/4" },
+  { title: "Auf und Ab Norbert Gälle 30", bpm: 125, takt: "2/4" },
+  { title: "Fuchsgraben Karel Vacek 10A", bpm: 118, takt: "2/4" },
+  { title: "Liebe auf den ersten Ton Peter Leitner 46", bpm: 110, takt: "4/4" },
+  { title: "Lasset uns das Leben genießen (mit Text) 43", bpm: 108, takt: "3/4" },
+  { title: "Südböhmische Polka Ladislav Kubes 49", bpm: 130, takt: "2/4" },
+  { title: "Crans-Montana Siegried Rundel 18A", bpm: 115, takt: "2/4" },
+  { title: "Alpenländler Peter Fihn 14B", bpm: 100, takt: "3/4" },
+  { title: "Gablonzer Perlen Antonin Borovicka 28", bpm: 120, takt: "2/4" },
+  { title: "Zwei Verliebte Augen Peter Fihn 12B", bpm: 118, takt: "2/4" },
+  { title: "Kuschel-Polka Peter Schad 25", bpm: 125, takt: "2/4" },
+  { title: "Musik, Musik Frantisek Kmoch 23B", bpm: 130, takt: "2/4" },
+  { title: "Ridnauner Landler", bpm: 90, takt: "3/4" },
+  { title: "Wir Musikanten Kurt Gäble 26", bpm: 115, takt: "2/4" },
+  { title: "Die Wiesich-Mohda (mit Text) Siegmund Blasisker 41", bpm: 108, takt: "3/4" },
+  { title: "Blumen der Liebe Peter Fihn 9A", bpm: 110, takt: "3/4" },
+  { title: "Böhmische Liebe (mit Text) Mathias Rauch 37", bpm: 118, takt: "4/4" },
+  { title: "Bergmannslust Sepp Neumayr 17A", bpm: 120, takt: "2/4" },
+  { title: "Steeephans Polka Alexander Pfluger 63", bpm: 130, takt: "2/4" },
+  { title: "Mein Heimatland (mit Text) Sepp Thaler 5A", bpm: 105, takt: "3/4" },
+  { title: "Böhmischer Traum Norbert Gälle 31", bpm: 120, takt: "4/4" },
+  { title: "Eine letzte Runde Markus Nentwich 60", bpm: 115, takt: "2/4" },
+  { title: "Die schönsten Jahre Armin Kofler 33", bpm: 110, takt: "3/4" },
+  { title: "Hallo kleine Maus Saso Avsenik & Tommy Budin 55", bpm: 125, takt: "2/4" },
+  { title: "Auf der Vogelwiese (mit Text) Josef Poncar 34", bpm: 130, takt: "2/4" },
+  { title: "Rosenduft Peter Schad 44", bpm: 118, takt: "2/4" },
+  { title: "Dem Land Tirol die Treue (mit Text) Florian Pedarnig 2B", bpm: 108, takt: "3/4" },
+  { title: "Bis bald auf Wiederseh'n Wenzel Zittner 39", bpm: 110, takt: "3/4" },
+  { title: "Spielmannsgruß Hans Schmid 7B", bpm: 115, takt: "2/4" },
+  { title: "Schloss Leuchtenburg Sepp Thaler 7A", bpm: 110, takt: "3/4" },
+  { title: "Schöne Serenade Karel Kohout 14A", bpm: 108, takt: "3/4" },
+  { title: "Komotauer Polka Rolf Schneebiegl 20B", bpm: 128, takt: "2/4" },
+  { title: "Die besten Jahre Martin Eller 56", bpm: 110, takt: "3/4" },
+  { title: "Die Alte Heimat Peter Fihn 9", bpm: 110, takt: "3/4" }
+];
+
+const select = document.getElementById('songSelect');
+const songInfo = document.getElementById('songInfo');
+const beatDisplay = document.getElementById('beatDisplay');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const modeSwitch = document.getElementById('modeSwitch');
+const pendulumRod = document.getElementById('pendulumRod');
+const pendulumBob = document.getElementById('pendulumBob');
+
+songs.forEach(song => {
+  const opt = document.createElement('option');
+  opt.value = song.title;
+  opt.textContent = `${song.title} (${song.bpm} BPM, ${song.takt})`;
+  select.appendChild(opt);
+});
+
+let interval = null;
+let audioCtx = null;
+
+function playClick(high = false) {
+  if(!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  osc.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  osc.type = 'square';
+  osc.frequency.value = high ? 1500 : 1000;
+  gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.05);
+}
+
+function animatePendulum(beat, taktBeats) {
+  // Schwingungswinkel in Grad: größerer Ausschlag bei 2/4, kleiner bei 3/4 usw.
+  // Hier einfach ±25° pendeln, Spitze bei Beat 1
+  let maxAngle = 25;
+  let angle = 0;
+  if(taktBeats === 2){
+    angle = (beat % 2 === 1) ? maxAngle : -maxAngle;
+  } else if(taktBeats === 3){
+    // 3/4: pendelt 1->2->3 mit weniger Ausschlag
+    if(beat === 1) angle = maxAngle;
+    else if(beat === 2) angle = 0;
+    else angle = -maxAngle/2;
+  } else {
+    // 4/4 oder mehr: einfache abwechselnde Bewegung
+    angle = (beat % 2 === 1) ? maxAngle : -maxAngle;
+  }
+  pendulumRod.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+  pendulumBob.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+}
+
+function startMetronome() {
+  stopMetronome();
+  const songTitle = select.value;
+  if (!songTitle) return alert('Bitte ein Lied auswählen');
+
+  const song = songs.find(s => s.title === songTitle);
+  songInfo.textContent = `BPM: ${song.bpm} | Takt: ${song.takt}`;
+  beatDisplay.textContent = 'Einzähler...';
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  let beat = 1;
+  const taktBeats = parseInt(song.takt.split('/')[0], 10);
+
+  // Einzähler
+  let countIn = 0;
+  const countInInterval = setInterval(() => {
+    playClick(countIn === 0);
+    beatDisplay.textContent = 'Einzähler: ' + (countIn + 1);
+    animatePendulum(countIn+1, taktBeats);
+    countIn++;
+    if (countIn >= taktBeats) {
+      clearInterval(countInInterval);
+      const intervalMs = 60000 / song.bpm;
+      interval = setInterval(() => {
+        playClick(beat === 1);
+        beatDisplay.textContent = beat;
+        beatDisplay.classList.add('pulse');
+        animatePendulum(beat, taktBeats);
+        setTimeout(() => beatDisplay.classList.remove('pulse'), 300);
+        beat++;
+        if (beat > taktBeats) beat = 1;
+      }, intervalMs);
+    }
+  }, 60000 / song.bpm);
+}
+
+function stopMetronome() {
+  if (interval) clearInterval(interval);
+  beatDisplay.textContent = '-';
+  songInfo.textContent = 'BPM: - | Takt: -';
+  pendulumRod.style.transform = `translateX(-50%) rotate(0deg)`;
+  pendulumBob.style.transform = `translateX(-50%) rotate(0deg)`;
+  if (audioCtx) {
+    audioCtx.close();
+    audioCtx = null;
+  }
+}
+
+startBtn.addEventListener('click', startMetronome);
+stopBtn.addEventListener('click', stopMetronome);
+
+// Dark mode toggle
+function toggleMode() {
+  document.body.classList.toggle('dark');
+  modeSwitch.classList.toggle('dark');
+}
+modeSwitch.addEventListener('click', toggleMode);
+
+// System preference beim Laden abfragen
+if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){
+  toggleMode();
+}
+</script>
+
+</body>
+</html>
